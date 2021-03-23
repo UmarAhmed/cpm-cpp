@@ -1,2 +1,11 @@
 # cpm-cpp
-Implementation of the closest point method in C++
+
+Dependencies:
+* Python 3.8
+* Armadillo
+
+Use "make" to build and then run the executable "/bin/main"
+
+
+
+
