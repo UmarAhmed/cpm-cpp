@@ -98,7 +98,7 @@ int main() {
     std::cout << "Solving took: " << s << std::endl;
 
 
-    const arma::vec theta = linspace(0, 6.28, 100);
+    const arma::vec theta = linspace(0, 6.28, 500);
 
     std::vector<arma::vec> plot_pts;
     std::vector<double> exact_v;
