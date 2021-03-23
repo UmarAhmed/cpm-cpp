@@ -10,7 +10,7 @@ using namespace arma;
 /*
  * Implementation of Automatic-Least Square Projection
 */
-vec LSP(vec p, std::vector<vec> pts, double epsilon = 0.0001, int max_steps = 5) {
+vec LSP(vec p, std::vector<vec> pts, const double epsilon = 0.0001, const int max_steps = 5) {
     int k = 0;
     double t = 0;
     vec n;
@@ -71,6 +71,7 @@ vec LSP(vec p, std::vector<vec> pts, double epsilon = 0.0001, int max_steps = 5)
     return p + t * n;
 }
 
+/*
 int main() {
 
     vector<vec> pts;
@@ -94,3 +95,4 @@ int main() {
     double n = timer.toc();
     cout << "Projecting " << N << " points onto a set of " << pts.size() << " took " << n << endl; 
 }
+*/
