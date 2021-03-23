@@ -72,9 +72,7 @@ int main() {
         }
     }
 
-    sp_mat laplacian = createLaplacian(band, x_pts.size() * y_pts.size(), x_pts.size(), dx);
-
-
+    const sp_mat laplacian = createLaplacian(band, x_pts.size() * y_pts.size(), x_pts.size(), dx);
     const sp_mat E = createInterpMatrix(x_pts, y_pts, cp_pts, band);
 
     // Compute right hand side and initial guess u_0 based on
@@ -118,8 +116,7 @@ int main() {
     const std::vector<double> u_v = arma::conv_to<std::vector<double>>::from(circplot);
 
 
-
-
+    // Graph the exact and computed solutions
     plt::figure_size(800, 600);
 
     plt::named_plot("Computed solution", theta_v, u_v);
