@@ -7,6 +7,7 @@
 using namespace std;
 using namespace arma;
 
+
 /*
  * vec = [x0, ..., xn] of the cartesian product grid
 */

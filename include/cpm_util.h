@@ -23,7 +23,6 @@ arma::sp_mat interp_matrix_3d(const std::vector<double> x_pts,
         const std::vector<arma::vec> pts, std::vector<int> band);
 
 
-
 arma::vec jacobiSolve(const arma::sp_mat& E, const arma::sp_mat& L, const arma::vec& b, arma::vec u);
 
 #endif
