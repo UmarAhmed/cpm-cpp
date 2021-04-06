@@ -37,6 +37,31 @@ sp_mat createLaplacian(const std::vector<int>& band, const int N, const int grid
 }
 
 
+// 3d laplacian
+sp_mat laplacian_3d(const std::vector<int>& band, const int N, const int grid_width, const double dx) {
+    const double diag = -6 / (dx * dx);
+    const double off = 1 / (dx * dx);
+    sp_mat lap (band.size(), N);
+
+    for (int i = 0; i < band.size(); i++) {
+        const int idx = band[i];
+        lap(i, idx) = diag;
+        lap(i, idx - 1) = lap(i, idx + 1) = off;
+        lap(i, idx - grid_width) = lap(i, idx + grid_width) = off;
+        lap(i, idx - grid_width * grid_width) = lap(i, idx + grid_width * grid_width) = off;
+    }
+
+    // Do the trimming
+    sp_mat trim_lap (band.size(), band.size());
+
+    for (int i = 0; i < band.size(); i++) {
+        const int idx = band[i];
+        trim_lap.col(i) = lap.col(idx);
+    }
+    return trim_lap;
+}
+
+
 /*
  * Find k closest items to val in arr
  * Assumes that arr is uniform; ie arr[i] = arr[i] + i * (arr[1] - arr[0]) 
@@ -76,8 +101,6 @@ double lagrange1D(const double x, const std::vector<double>& arr, const int i) {
 }
 
 
-
-
 // Create interpolation matrix
 sp_mat createInterpMatrix(const std::vector<double>& x_pts, const std::vector<double>& y_pts, const std::vector<vec>& pts, const std::vector<int>& band) {
     sp_mat E(pts.size(), band.size());
@@ -115,6 +138,72 @@ sp_mat createInterpMatrix(const std::vector<double>& x_pts, const std::vector<do
     }
     return E;
 }
+
+
+// 3d interpolation
+sp_mat interp_matrix_3d(const std::vector<double> x_pts,
+        const std::vector<double> y_pts,
+        const std::vector<double> z_pts,
+        const std::vector<arma::vec> pts, std::vector<int> band) {
+    sp_mat E(pts.size(), band.size());
+
+    const int n = x_pts.size();
+
+
+    for (int k = 0; k < pts.size(); k++) {
+        const vec p = pts[k];
+
+        // Find points enclosed in interpolation stencil
+        constexpr int K = 4;
+        const int x_start = kClosest(x_pts, p(0), K);
+        const int y_start = kClosest(y_pts, p(1), K);
+        const int z_start = kClosest(z_pts, p(2), K);
+
+
+        // Sanity check that indices are valid (can remove later)
+        if (x_start < 0 || y_start < 0 || z_start < 0) {
+            std::cout << "invalid idx from kClosest" << std::endl;
+            throw;
+        }
+        if (x_start > n || y_start > n || z_start > n) {
+            std::cout << "invalid idx from kClosest" << std::endl;
+            throw;
+        }
+        std::vector<double> x_stencil (K);
+        std::vector<double> y_stencil (K);
+        std::vector<double> z_stencil (K);
+
+        for (int i = 0; i < K; i++) {
+            x_stencil[i] = x_pts[x_start + i];
+            y_stencil[i] = y_pts[y_start + i];
+            z_stencil[i] = z_pts[z_start + i];
+        }
+ 
+        // Compute and place weight
+        for (int i = 0; i < K; i++) {
+            for (int j = 0; j < K; j++) {
+                for (int l = 0; l < K; l++) {
+                    const double w = lagrange1D(p(0), x_stencil, i) * lagrange1D(p(1), y_stencil, j) * lagrange1D(p(2), z_stencil, l);
+                    const int pts_idx = (x_start + i) + n * ( (y_start + j) + n * (z_start + l));
+                    const auto it = std::lower_bound(band.begin(), band.end(), pts_idx);
+                    const int band_k = it - band.begin();
+                    E(k, band_k) = w;
+                    /*
+                    */
+                }
+            }
+        }
+        /*
+        const auto f = sum(E.row(k));
+        if ( f > 1.01 || f < 0.99) {
+            throw "sum of row in interpolation matrix is not 1";
+        }
+        */
+    }
+    return E;
+}
+
+
 
 
 // Uses Jacobi iteration to find solution

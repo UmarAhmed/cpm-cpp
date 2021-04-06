@@ -11,8 +11,16 @@
 arma::sp_mat createLaplacian(const std::vector<int>& band, const int N, const int grid_width, const double dx);
 
 
+arma::sp_mat laplacian_3d(const std::vector<int>& band, const int N, const int grid_width, const double dx);
+
 
 arma::sp_mat createInterpMatrix(const std::vector<double>& x_pts, const std::vector<double>& y_pts, const std::vector<arma::vec>& pts, const std::vector<int>& band);
+
+
+arma::sp_mat interp_matrix_3d(const std::vector<double> x_pts,
+        const std::vector<double> y_pts,
+        const std::vector<double> z_pts,
+        const std::vector<arma::vec> pts, std::vector<int> band);
 
 
 

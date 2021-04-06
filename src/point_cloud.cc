@@ -1,11 +1,53 @@
 #include <iostream>
 #include <armadillo>
 #include <vector>
+#include <algorithm>
 
 
 using namespace std;
 using namespace arma;
 
+/*
+ * vec = [x0, ..., xn] of the cartesian product grid
+*/
+std::vector<std::vector<int>> warm_start_3d(const vec pts, const std::vector<vec> surface, const double threshold) {
+    const int n = pts.size();
+    std::vector<std::vector<int>> grid_dict(n * n * n);
+    const double dx = pts(1) - pts(0);
+    const int r = ceil(threshold / dx);
+
+    for (int i = 0; i < surface.size(); i++) {
+        const vec s = surface[i];
+
+        const int grid_x = round( (s(0) - pts(0)) / dx);
+        const int grid_y = round( (s(1) - pts(0)) / dx);
+        const int grid_z = round( (s(2) - pts(0)) / dx);
+
+        const int leftx = std::max(0, grid_x - r);
+        const int rightx = std::min(n - 1, grid_x + r);
+
+
+        const int lefty = std::max(0, grid_y - r);
+        const int righty = std::min(n - 1, grid_y + r);
+
+        const int leftz = std::max(0, grid_z - r);
+        const int rightz = std::min(n - 1, grid_z + r);
+
+        for (int row = leftx; row < rightx + 1; row++) {
+            for (int col = lefty; col < righty + 1; col++) {
+                for (int za = leftz; za < rightz + 1; za++) {
+                    const vec q {pts(row), pts(col), pts(za)};
+                    if (norm(q - s) <= threshold) {
+                        const int idx = row + n * (col + n * za);
+                        grid_dict[idx].emplace_back(i);
+                    }
+                    // only add points in band
+                }
+            }
+        }
+    }
+    return grid_dict;
+}
 
 /*
  * Implementation of Automatic-Least Square Projection
